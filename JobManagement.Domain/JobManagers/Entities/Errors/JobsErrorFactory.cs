@@ -1,5 +1,6 @@
 ﻿using FluentResults;
 using JobManagement.Domain.Common;
+using JobManagement.Domain.JobManagers.Entities.ValueObjects;
 
 namespace JobManagement.Domain.JobManagers.Entities.Errors;
 
@@ -22,13 +23,63 @@ public static class JobsErrorFactory
     public static ErrorBase CannotStartJobNotInPendingOrRestartingState() =>
         new ErrorBase(JobsGroupCode, 5, "cannot start job not in pending status");
 
-    public static Result ExecutionJobFailedToStop() =>
+    public static ErrorBase ExecutionJobFailedToStop() =>
         new ErrorBase(JobsGroupCode, 6, "execution job failed to stop");
 
-    public static Result CannotStopJobWhichDidNotStart() =>
+    public static ErrorBase CannotStopJobWhichDidNotStart() =>
         new ErrorBase(JobsGroupCode, 7, "cannot stop job which did not start");
 
-    public static Result CannotRestartJobWhichWasNotStarted() =>
+    public static ErrorBase CannotRestartJobWhichWasNotStarted() =>
         new ErrorBase(JobsGroupCode, 8, "cannot restart job which was not started");
+
+    public static ErrorBase CannotAppendJobAsMaxConcurrentJobsReached() =>
+        new ErrorBase(JobsGroupCode, 9, "cannot append job as max concurrent jobs reached");
+
+    public static ErrorBase CouldNotFindJob() =>
+        new ErrorBase(JobsGroupCode, 10, "could not find job");
+
+    public static ErrorBase CouldNotFetchJobManagerFromRepository() =>
+        new ErrorBase(JobsGroupCode, 11, "could not fetch job manager from repository");
+
+    public static ErrorBase FailedUpdatingJobManager() =>
+        new ErrorBase(JobsGroupCode, 12, "failed updating job manager");
+
+    public static ErrorBase FailedJobManagerToRepository() =>
+        new ErrorBase(JobsGroupCode, 13, "failed job manager to repository");
+
+    public static ErrorBase JobNameIsInvalid() =>
+        new ErrorBase(JobsGroupCode, 14, "job name is invalid");
+
+    public static ErrorBase JobNameIsTooShort() =>
+        new ErrorBase(JobsGroupCode, 15, "job name is too short");
+
+    public static ErrorBase JobNameIsTooLong() =>
+        new ErrorBase(JobsGroupCode, 16, "job name is too long");
+
+    public static ErrorBase JobPriorityIsInvalid() => 
+        new ErrorBase(JobsGroupCode, 17, "job priority is invalid");
+
+    public static ErrorBase JobCanceled() =>
+        new ErrorBase(JobsGroupCode, 18, "job was canceled");
+
+    public static ErrorBase JobExecutionNameIsInvalid() =>
+    new ErrorBase(JobsGroupCode, 19, "job exec name is invalid");
+
+    public static ErrorBase JobExecutionNameIsTooShort() =>
+        new ErrorBase(JobsGroupCode, 20, "job exec name is too short");
+
+    public static ErrorBase JobExecutionNameIsTooLong() =>
+        new ErrorBase(JobsGroupCode, 21, "job exec name is too long");
+
+    public static ErrorBase CouldNotAttachJobExecutable() =>
+        new ErrorBase(JobsGroupCode, 22, "could not attach job executable");
+
+    public static ErrorBase CouldNotFindJobExecution() =>
+        new ErrorBase(JobsGroupCode, 23, "could not find job execution");
+
+    public static ErrorBase JobExecutionIsAlreadyRunning() =>
+    new ErrorBase(JobsGroupCode, 24, "job execution is already running");
+    public static ErrorBase CouldNotRemoveJobExecution() =>
+        new ErrorBase(JobsGroupCode, 25, "could not remove job execution");
 
 }

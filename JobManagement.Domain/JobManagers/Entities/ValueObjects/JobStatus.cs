@@ -26,7 +26,7 @@ public class JobStatus : SmartEnum<JobStatus>
 
     public Result<JobStatus> Start()
     {
-        if (this != Pending || this != Restarting)
+        if (!(this != Pending || this != Restarting))
             return JobsErrorFactory.CannotStartJobNotInPendingOrRestartingState();
 
         return Running;

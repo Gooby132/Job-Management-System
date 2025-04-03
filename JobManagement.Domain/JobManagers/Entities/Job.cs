@@ -1,7 +1,9 @@
 ﻿using FluentResults;
+using JobManagement.Domain.JobManagers.Entities.Abstractions;
 using JobManagement.Domain.JobManagers.Entities.Entities;
 using JobManagement.Domain.JobManagers.Entities.Errors;
 using JobManagement.Domain.JobManagers.Entities.ValueObjects;
+using JobManagement.Domain.JobManagers.Services;
 
 namespace JobManagement.Domain.JobManagers.Entities;
 
@@ -10,13 +12,6 @@ namespace JobManagement.Domain.JobManagers.Entities;
 /// </summary>
 public class Job
 {
-    #region Members
-
-    private readonly IJobExecution _jobExecution; // not persisted
-    private CancellationTokenSource? _cancellationTokenSource;
-    private Task? _task;
-
-    #endregion
 
     #region Properties
 
@@ -24,6 +19,7 @@ public class Job
 
     public required JobName Name { get; init; }
     public required JobPriority Priority { get; init; }
+    public required JobExecutionName ExecutionName { get; init; }
     public JobStatus Status { get; private set; } = JobStatus.Pending;
     public required DateTime CreatedInUtc { get; init; }
     public required DateTime ExecutionTimeInUtc { get; init; }
@@ -35,72 +31,84 @@ public class Job
 
     #region Constructors
 
-    // only constructible by factory method
-#pragma warning disable CS8618 // Non-nullable field (this constructor is for EF core)
     private Job() { }
-#pragma warning restore CS8618
-
-    private Job(IJobExecution jobExecution)
-    {
-        _jobExecution = jobExecution;
-    }
 
     public static Result<Job> Create(
         JobName name,
-        JobPriority priority,
-        DateTime? executionTimeInUtc,
-        IJobExecution jobExecution
+        JobExecutionName executionName,
+        int priorityValue,
+        string? executionTimeInUtcString
         )
     {
-        if (executionTimeInUtc < DateTime.UtcNow)
-            return JobsErrorFactory.CannotCreateJobWithExecutionTimeInThePast();
-
-        var creationTime = DateTime.UtcNow; // setting the execution time with creation time if none given
-
         var jobLog = new JobLog();
-        jobLog.Append($"job with name - {name} created at time - {creationTime.ToString("O")}");
+        var creationTimeInUtc = DateTime.UtcNow; // setting the execution time with creation time if none given
+        var executionTimeInUtc = DateTime.UtcNow;
 
-        return new Job(jobExecution)
+        if (executionTimeInUtcString is not null &&
+            DateTime.TryParse(executionTimeInUtcString, out executionTimeInUtc) // overloads executionTimeInUtc if needed
+            )
+        {
+            if (executionTimeInUtc < DateTime.UtcNow)
+                return JobsErrorFactory.CannotCreateJobWithExecutionTimeInThePast();
+        }
+
+        if (!JobPriority.TryFromValue(priorityValue, out var jobPriority))
+            return JobsErrorFactory.JobPriorityIsInvalid();
+
+        jobLog.Append($"job with name - {name} created at time - {creationTimeInUtc.ToString("O")}");
+
+        return new Job
         {
             Name = name,
-            Priority = priority,
-            ExecutionTimeInUtc = executionTimeInUtc ?? creationTime,
-            CreatedInUtc = creationTime,
+            Priority = jobPriority,
+            ExecutionName = executionName,
+            ExecutionTimeInUtc = executionTimeInUtcString is not null ? executionTimeInUtc : creationTimeInUtc,
+            CreatedInUtc = creationTimeInUtc,
             Log = jobLog,
         };
     }
 
     #endregion
 
-
     #region Methods
 
-    public Result Start()
+    internal Result<Job> Start(
+        IExecutionProvider jobProvider,
+        IJobExecutionBag bag)
     {
-        if (ExecutionTimeInUtc > DateTime.UtcNow)
-            return JobsErrorFactory.CannotStartJobWithExecutionTimeInTheFuture();
 
         var startStatus = Status.Start();
 
         if (startStatus.IsFailed)
             return Result.Fail(startStatus.Errors);
 
-        Status = startStatus.Value;
+        var exec = jobProvider.CreateInstance(ExecutionName);
+
+        if (exec is null)
+            return JobsErrorFactory.CouldNotFindJobExecution();
+
+        var runExecutable = bag.AppendExecutable(Name, exec);
+
+        if (runExecutable.IsFailed)
+        {
+            Status = JobStatus.Failed;
+            return Result.Fail(runExecutable.Errors);
+        }
+
+        exec.Run();
 
         var startTime = DateTime.UtcNow;
 
         Log.Append($"job with name - {Name} started at time - {startTime.ToString("O")}");
+        Status = startStatus.Value;
         StartTimeInUtc = startTime;
 
-        _cancellationTokenSource = new();
-        _task = _jobExecution.Run(_cancellationTokenSource.Token);
-
-        return Result.Ok();
+        return Result.Ok(this);
     }
 
-    public Result RequestStopJob()
+    internal Result<Job> RequestStopJob(
+        IJobExecutionBag bag)
     {
-
         Log.Append($"job with name - {Name} stopping");
 
         var stopStatus = Status.Stop();
@@ -108,25 +116,20 @@ public class Job
         if (stopStatus.IsFailed)
             return Result.Fail(stopStatus.Errors);
 
+        var execution = bag.GetExecutionByJobName(Name);
+
+        if (execution is null)
+            return JobsErrorFactory.CouldNotFindJobExecution();
+
+        execution.Stop();
+
         Status = stopStatus.Value;
 
-        try
-        {
-            _cancellationTokenSource!.Cancel(); // should not be null as job must be running state
-            _task!.Wait(CancelationTimeout); // should be canceled by cancellation token 
-        }
-        catch (Exception)
-        {
-            Log.Append($"job with name - {Name} failed to stop. stopping forcefully");
-            _jobExecution.ForceStop();
-
-            return JobsErrorFactory.ExecutionJobFailedToStop();
-        }
-
-        return Result.Ok();
+        return Result.Ok(this);
     }
 
-    public Result<Job> Restart()
+    internal Result<Job> Restart(
+        IJobExecutionBag bag)
     {
         var restartStatus = Status.Restart();
 
@@ -135,25 +138,54 @@ public class Job
 
         Log.Append($"job with name - {Name} restarting");
 
-        RequestStopJob();
+        var execution = bag.GetExecutionByJobName(Name);
+
+        if (execution is null)
+            return JobsErrorFactory.CouldNotFindJobExecution();
+
+        execution.Stop();
 
         Status = restartStatus.Value;
 
-        Start();
-
-        return Result.Ok();
+        return Result.Ok(this);
     }
 
-    public Result Delete()
+    internal Result<Job> Delete()
     {
         var deleteStatus = Status.Delete();
 
         if (deleteStatus.IsFailed)
             return Result.Fail(deleteStatus.Errors);
 
+        EndTimeInUtc = DateTime.UtcNow;
         Log.Append($"job with name - {Name} deleted");
 
-        return Result.Ok();
+        return Result.Ok(this);
+    }
+
+    public bool ShouldStart(IJobExecutionBag bag)
+    {
+        if (Status == JobStatus.Pending && ExecutionTimeInUtc < DateTime.UtcNow)
+            return true;
+
+        if (Status == JobStatus.Restarting)
+        {
+            var execution = bag.GetExecutionByJobName(Name);
+
+            if (execution is null)
+            {
+                Log.Append(
+                    $"job with name - {Name} failed. " +
+                    $"error - {JobsErrorFactory.CouldNotFindJobExecution().Message}");
+                Status = JobStatus.Failed;
+                return false;
+            }
+
+            if (execution.IsStopped)
+                return true;
+        }
+
+        return false;
     }
 
     #endregion

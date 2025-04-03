@@ -9,7 +9,5 @@ public class JobPriority : SmartEnum<JobPriority>
     public static readonly JobPriority Regular = new JobPriority(nameof(Regular), 2);
 
     private JobPriority(string name, int value) :
-        base(name, value)
-    {
-    }
+        base(name, value) { }
 }

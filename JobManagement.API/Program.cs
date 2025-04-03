@@ -1,3 +1,5 @@
+using JobManagement.Infrastructure.DependencyInjection;
+using JobManagement.Persistence.DependencyInjection;
 
 namespace JobManagement.API
 {
@@ -14,6 +16,9 @@ namespace JobManagement.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.ConfigurePersistence(builder.Configuration);
+            builder.Services.ConfigureInfrastructure(builder.Configuration);
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -22,6 +27,8 @@ namespace JobManagement.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.Services.SeedLocalExecutables();
 
             app.UseHttpsRedirection();
 

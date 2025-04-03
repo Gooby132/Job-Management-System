@@ -11,4 +11,18 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\JobManagement.Domain\JobManagement.Domain.csproj" />
+    <ProjectReference Include="..\JobManagement.Infrastructure\JobManagement.Infrastructure.csproj" />
+    <ProjectReference Include="..\JobManagement.Persistence\JobManagement.Persistence.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Contracts\Commons\Requests\" />
+    <Folder Include="Contracts\Commons\Responses\" />
+    <Folder Include="Contracts\Users\Dtos\" />
+    <Folder Include="Contracts\Users\Requests\" />
+    <Folder Include="Contracts\Users\Responses\" />
+  </ItemGroup>
+
 </Project>
