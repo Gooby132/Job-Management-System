@@ -25,8 +25,8 @@ internal class ApplicationContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        //optionsBuilder.UseNpgsql(_connectionString);
-        optionsBuilder.UseInMemoryDatabase("test");
+        optionsBuilder.UseNpgsql(_connectionString);
+        //optionsBuilder.UseInMemoryDatabase("test");
         base.OnConfiguring(optionsBuilder);
     }
 
