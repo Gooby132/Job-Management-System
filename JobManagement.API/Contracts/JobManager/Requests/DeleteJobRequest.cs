@@ -3,6 +3,6 @@
 public class DeleteJobRequest
 {
 
-    public string? Name { get; init; }
+    public string? JobName { get; init; }
 
 }

@@ -20,9 +20,19 @@ public interface IJobExecution
     public int Progress { get; }
 
     /// <summary>
+    /// Represents if the execution failed
+    /// </summary>
+    public bool IsFailed { get; }
+
+    /// <summary>
+    /// Represents if the execution was completed successfully
+    /// </summary>
+    public bool IsCompleted { get; }
+
+    /// <summary>
     /// Represents if the execution stopped
     /// </summary>
-    public bool IsStopped { get; }
+    public bool IsCanceled { get; }
 
     /// <summary>
     /// Method for starting execution 

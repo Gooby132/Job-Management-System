@@ -10,15 +10,17 @@ namespace JobManagement.API.Helpers;
 public static class ErrorExtension
 {
 
+    public static ErrorDto ToDto(this ErrorBase error) => new ErrorDto
+    {
+        GroupCode = error.GroupCode,
+        ErrorCode = error.ErrorCode,
+        Message = error.Message
+    };
+
     public static IEnumerable<ErrorDto> ToDtos(this IEnumerable<IError> errors) =>
         errors
         .Where(e => e is ErrorBase)
-        .Select(e => new ErrorDto
-        {
-            GroupCode = (e as ErrorBase)!.GroupCode,
-            ErrorCode = (e as ErrorBase)!.ErrorCode,
-            Message = e.Message
-        });
+        .Select(e => (e as ErrorBase)!.ToDto());
 
     public static JobDto ToDto(this Job job, IJobExecution? execution = null) => new JobDto
     {
@@ -36,6 +38,6 @@ public static class ErrorExtension
     public static IEnumerable<JobDto> ToDtos(this IEnumerable<Job> jobs) =>
         jobs.Select(j => j.ToDto());
 
-    public static IEnumerable<JobDto> ToDtos(this IEnumerable<KeyValuePair<Job, IJobExecution>> jobs) =>
+    public static IEnumerable<JobDto> ToDtos(this IEnumerable<KeyValuePair<Job, IJobExecution?>> jobs) =>
     jobs.Select(j => j.Key.ToDto(j.Value));
 }

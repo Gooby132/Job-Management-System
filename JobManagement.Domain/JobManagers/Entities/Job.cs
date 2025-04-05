@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using JobManagement.Domain.Common;
 using JobManagement.Domain.JobManagers.Entities.Abstractions;
 using JobManagement.Domain.JobManagers.Entities.Entities;
 using JobManagement.Domain.JobManagers.Entities.Errors;
@@ -44,7 +45,7 @@ public class Job
         var creationTimeInUtc = DateTime.UtcNow; // setting the execution time with creation time if none given
         var executionTimeInUtc = DateTime.UtcNow;
 
-        if (executionTimeInUtcString is not null &&
+        if (!string.IsNullOrEmpty(executionTimeInUtcString) &&
             DateTime.TryParse(executionTimeInUtcString, out executionTimeInUtc) // overloads executionTimeInUtc if needed
             )
         {
@@ -62,7 +63,7 @@ public class Job
             Name = name,
             Priority = jobPriority,
             ExecutionName = executionName,
-            ExecutionTimeInUtc = executionTimeInUtcString is not null ? executionTimeInUtc : creationTimeInUtc,
+            ExecutionTimeInUtc = !string.IsNullOrEmpty(executionTimeInUtcString) ? executionTimeInUtc : creationTimeInUtc,
             CreatedInUtc = creationTimeInUtc,
             Log = jobLog,
         };
@@ -136,8 +137,6 @@ public class Job
         if (restartStatus.IsFailed)
             return Result.Fail(restartStatus.Errors);
 
-        Log.Append($"job with name - {Name} restarting");
-
         var execution = bag.GetExecutionByJobName(Name);
 
         if (execution is null)
@@ -146,6 +145,7 @@ public class Job
         execution.Stop();
 
         Status = restartStatus.Value;
+        Log.Append($"job with name - {Name} restarting");
 
         return Result.Ok(this);
     }
@@ -157,10 +157,62 @@ public class Job
         if (deleteStatus.IsFailed)
             return Result.Fail(deleteStatus.Errors);
 
+        Status = deleteStatus.Value;
         EndTimeInUtc = DateTime.UtcNow;
         Log.Append($"job with name - {Name} deleted");
 
         return Result.Ok(this);
+    }
+
+    internal Result Completed()
+    {
+        var completed = Status.HasCompleted();
+
+        if(completed.IsFailed)
+            return Result.Fail(completed.Errors);
+
+        Log.Append($"job with name - {Name} completed");
+        Status = completed.Value;
+        EndTimeInUtc = DateTime.UtcNow;
+
+        return Result.Ok();
+    }
+
+    internal Result Fail(ErrorBase errorBase)
+    {
+        var failed = Status.DidFail();
+
+        if(failed.IsFailed)
+            return Result.Fail(failed.Errors);
+
+        Log.Append($"job with name - {Name} failed. error - {errorBase.Message}");
+        Status = failed.Value;
+
+        return Result.Ok();
+    }
+
+    internal Result Sample(IJobExecutionBag bag)
+    {
+        if (!Status.ShouldSample())
+            return Result.Ok();
+
+        var execution = bag.GetExecutionByJobName(Name);
+
+        if (execution is null)
+        {
+            Log.Append($"job with name - {Name} sampling execution");
+            return JobsErrorFactory.CouldNotFindJobExecution();
+        }
+
+        Log.Append($"job with name - {Name} sampling execution");
+
+        if (execution.IsCompleted)
+            return Completed();
+
+        if (execution.IsFailed)
+            return Fail(JobsErrorFactory.ExecutionJobFailedToStop());
+
+        return Result.Ok();
     }
 
     public bool ShouldStart(IJobExecutionBag bag)
@@ -181,7 +233,7 @@ public class Job
                 return false;
             }
 
-            if (execution.IsStopped)
+            if (execution.IsCanceled)
                 return true;
         }
 

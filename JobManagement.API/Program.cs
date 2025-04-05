@@ -1,3 +1,5 @@
+using JobManagement.API.DependencyInjection;
+using JobManagement.API.Hubs;
 using JobManagement.Infrastructure.DependencyInjection;
 using JobManagement.Persistence.DependencyInjection;
 
@@ -9,16 +11,10 @@ namespace JobManagement.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-
+            builder.Services.ConfigureApplication(builder.Configuration);
             builder.Services.ConfigurePersistence(builder.Configuration);
             builder.Services.ConfigureInfrastructure(builder.Configuration);
-
+            
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -30,10 +26,11 @@ namespace JobManagement.API
 
             app.Services.SeedLocalExecutables();
 
+            app.UseCors();
             app.UseHttpsRedirection();
+            app.MapHub<JobManagerHub>("/api/JobManagerHub");
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 

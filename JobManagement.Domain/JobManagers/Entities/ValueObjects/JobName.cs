@@ -32,8 +32,8 @@ public class JobName
 
     public override string ToString() => Value;
 
-    public static bool operator ==(JobName left, JobName right) => left.Equals(right?.Value);
-    public static bool operator !=(JobName left, JobName right) => !left.Equals(right?.Value);
+    public static bool operator ==(JobName left, JobName right) => left.Equals(right);
+    public static bool operator !=(JobName left, JobName right) => !left.Equals(right);
 
     public override bool Equals(object? obj) => obj is JobName && ((JobName)obj).Value == Value;
 

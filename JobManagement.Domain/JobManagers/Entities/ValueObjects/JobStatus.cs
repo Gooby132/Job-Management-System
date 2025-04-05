@@ -24,6 +24,12 @@ public class JobStatus : SmartEnum<JobStatus>
         base(name, value)
     { }
 
+    public bool ShouldSample() =>
+        this == Pending ||
+        this == Restarting ||
+        this == Running ||
+        this == Stopping;
+
     public Result<JobStatus> Start()
     {
         if (!(this != Pending || this != Restarting))
@@ -50,11 +56,39 @@ public class JobStatus : SmartEnum<JobStatus>
 
     public Result<JobStatus> Delete()
     {
-        if (this != Completed ||
-            this != Failed)
+        if (!(this != Completed ||
+            this != Failed))
             return JobsErrorFactory.CannotDeleteJobNotInCompletedOrFailedStatus();
 
         return PendingDeletion;
+    }
+
+    public Result<JobStatus> HasCompleted()
+    {
+        if (!(
+            this != Pending ||
+            this != Running ||
+            this != Restarting)) // running and pending states if sampling interval was too large
+            return JobsErrorFactory.CannotCompleteJobIfWasNotPending();
+
+        if (this == Stopping)
+            return Stopped;
+
+        return Completed;
+    }
+
+    public Result<JobStatus> DidFail() 
+    {
+        if(this == Pending)
+            return Result.Fail(JobsErrorFactory.CannotFailJobStatusWhichDidNotRun());
+
+        if (this == Completed)
+            return Result.Fail(JobsErrorFactory.CannotFailJobStatusThatAlreadyCompleted());
+
+        if (this == Stopped)
+            return Result.Fail(JobsErrorFactory.CannotFailJobStatusThatAlreadyCompleted());
+
+        return Failed;
     }
 
 }

@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using JobManagement.Domain.Common;
 using JobManagement.Domain.JobManagers.Entities;
 using JobManagement.Domain.JobManagers.Entities.Abstractions;
 using JobManagement.Domain.JobManagers.Entities.Errors;
@@ -103,7 +104,11 @@ public class JobManager
         return job.Value.Delete();
     }
 
-    public Result Tick(IJobExecutionBag bag, IExecutionProvider jobProvider)
+    public async Task<Result> Tick(
+        IJobExecutionBag bag,
+        IExecutionProvider jobProvider,
+        IJobManagerNotificationService? notificationService,
+        CancellationToken token = default)
     {
         var errors = new List<IError>();
 
@@ -115,7 +120,7 @@ public class JobManager
                     break;
 
                 var startResult = job.Start(
-                    jobProvider, 
+                    jobProvider,
                     bag);
 
                 if (startResult.IsFailed)
@@ -124,15 +129,33 @@ public class JobManager
                 break;
             }
 
-            if(job.Status == JobStatus.PendingDeletion)
+            var sample = job.Sample(bag);
+
+            if (sample.IsFailed)
+                return Result.Fail(sample.Errors);
+
+            if (job.Status == JobStatus.PendingDeletion)
             {
                 Jobs.Remove(job);
                 break;
             }
         }
 
+        if (notificationService != null)
+            await notificationService.NotifyJobSamplingEnded(
+                Jobs,
+                errors
+                    .Where(e => e is ErrorBase)
+                    .Select(e => (ErrorBase)e),
+                token);
+
+        if (errors.Any())
+            return Result.Fail(errors);
+
         return Result.Ok();
     }
+
+    public Job? GetJobByJobName(JobName jobName) => Jobs.FirstOrDefault(j => j.Name == jobName);
 
     private Result<Job> FindJobByJobName(JobName jobName)
     {

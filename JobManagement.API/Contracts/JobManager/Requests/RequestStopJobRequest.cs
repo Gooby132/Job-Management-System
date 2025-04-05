@@ -3,6 +3,6 @@
 public class RequestStopJobRequest
 {
 
-    public string? Name { get; init; }
+    public string? JobName { get; init; }
 
 }

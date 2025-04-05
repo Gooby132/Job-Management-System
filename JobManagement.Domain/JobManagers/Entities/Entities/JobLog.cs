@@ -15,7 +15,7 @@ public class JobLog
         if (Value.Length > MaxLength)
             Value = Value.Substring(time.Length + log.Length, MaxLength - 1);
 
-        Value += $"{time}: {log}";
+        Value += $"{time}: {log}{Environment.NewLine}";
     }
 
 }

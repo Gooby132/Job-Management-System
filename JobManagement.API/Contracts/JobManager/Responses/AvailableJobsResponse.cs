@@ -3,6 +3,6 @@
 public class AvailableJobsResponse
 {
 
-    public required IEnumerable<string> Jobs { get; init; }
+    public required IEnumerable<string> JobExecutions { get; init; }
 
 }

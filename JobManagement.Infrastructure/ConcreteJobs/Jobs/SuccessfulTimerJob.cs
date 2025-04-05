@@ -8,20 +8,22 @@ namespace JobManagement.Infrastructure.ConcreteJobs.Jobs;
 public class SuccessfulTimerJob : IJobExecution
 {
     #region Fields
-    
+
     private CancellationTokenSource _cancellationTokenSource = new();
     private Task? _task;
     private int _progress = 0;
-    private bool _force = false;
+    private bool _stop = false;
 
     #endregion
 
     #region Properties
-    
+
     public static JobExecutionName Name = JobExecutionName.Create(nameof(SuccessfulTimerJob)).Value;
-    
+
     public int Progress => _progress;
-    public bool IsStopped { get; set; }
+    public bool IsFailed { get; private set; }
+    public bool IsCanceled { get; private set; }
+    public bool IsCompleted { get => _progress == 100 || IsFailed || IsCanceled; }
 
     #endregion
 
@@ -30,34 +32,42 @@ public class SuccessfulTimerJob : IJobExecution
     public void Run() =>
         _task = Inner(_cancellationTokenSource.Token);
 
-    public async Task<Result> Inner(CancellationToken token)
+    public async Task Inner(CancellationToken token)
     {
         try
         {
             while (_progress < 100)
             {
-                if (_force)
-                    throw new TaskCanceledException();
+                if (_stop)
+                    return;
 
                 await Task.Delay(1000, token); // Simulate work being done
 
                 if (token.IsCancellationRequested)
-                    return Result.Fail(JobsErrorFactory.JobCanceled());
+                    return;
 
                 _progress++;
             }
 
-            return Result.Ok();
+            return;
         }
         catch (TaskCanceledException)
         {
-            return Result.Fail(JobsErrorFactory.JobCanceled());
+            return;
         }
     }
 
-    public void ForceStop() => _force = true;
+    public void ForceStop()
+    {
+        IsCanceled = true;
+        _cancellationTokenSource.Cancel();
+    }
 
-    public void Stop() => _cancellationTokenSource.Cancel();
+    public void Stop()
+    {
+        IsCanceled = true;
+        _stop = true;
+    }
 
     #endregion
 

@@ -1,6 +1,5 @@
 ﻿using FluentResults;
 using JobManagement.Domain.Common;
-using JobManagement.Domain.JobManagers.Entities.ValueObjects;
 
 namespace JobManagement.Domain.JobManagers.Entities.Errors;
 
@@ -27,7 +26,7 @@ public static class JobsErrorFactory
         new ErrorBase(JobsGroupCode, 6, "execution job failed to stop");
 
     public static ErrorBase CannotStopJobWhichDidNotStart() =>
-        new ErrorBase(JobsGroupCode, 7, "cannot stop job which did not start");
+        new ErrorBase(JobsGroupCode, 7, "cannot stop job which did not start or already finished");
 
     public static ErrorBase CannotRestartJobWhichWasNotStarted() =>
         new ErrorBase(JobsGroupCode, 8, "cannot restart job which was not started");
@@ -56,7 +55,7 @@ public static class JobsErrorFactory
     public static ErrorBase JobNameIsTooLong() =>
         new ErrorBase(JobsGroupCode, 16, "job name is too long");
 
-    public static ErrorBase JobPriorityIsInvalid() => 
+    public static ErrorBase JobPriorityIsInvalid() =>
         new ErrorBase(JobsGroupCode, 17, "job priority is invalid");
 
     public static ErrorBase JobCanceled() =>
@@ -78,8 +77,27 @@ public static class JobsErrorFactory
         new ErrorBase(JobsGroupCode, 23, "could not find job execution");
 
     public static ErrorBase JobExecutionIsAlreadyRunning() =>
-    new ErrorBase(JobsGroupCode, 24, "job execution is already running");
+        new ErrorBase(JobsGroupCode, 24, "job execution is already running");
+
     public static ErrorBase CouldNotRemoveJobExecution() =>
         new ErrorBase(JobsGroupCode, 25, "could not remove job execution");
+
+    public static ErrorBase CannotCompleteJobIfWasNotPending() =>
+        new ErrorBase(JobsGroupCode, 26, "cannot complete job if was not pending");
+
+    public static ErrorBase JobWasNotFound() =>
+        new ErrorBase(JobsGroupCode, 27, "job was not found");
+
+    public static ErrorBase NotifyJobSamplingFailed() =>
+        new ErrorBase(JobsGroupCode, 28, "notify job sampling failed");
+
+    public static ErrorBase CannotFailJobStatusThatAlreadyCompleted() =>
+        new ErrorBase(JobsGroupCode, 29, "cannot fail job status that already completed");
+
+    public static ErrorBase CannotFailJobStatusWhichDidNotRun() =>
+        new ErrorBase(JobsGroupCode, 30, "cannot fail job status which did not run");
+
+    public static ErrorBase ExecutionJobFailed() =>
+        new ErrorBase(JobsGroupCode, 31, "execution job failed");
 
 }

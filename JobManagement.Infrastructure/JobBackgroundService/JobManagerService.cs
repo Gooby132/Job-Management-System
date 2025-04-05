@@ -21,6 +21,7 @@ public class JobManagerService : BackgroundService
     private readonly JobServiceOptions _options;
     private readonly IExecutionProvider _jobProvider;
     private readonly IJobExecutionBag _jobExecutionBag;
+    private readonly IJobManagerNotificationService _notificationService;
 
     #endregion
 
@@ -36,13 +37,16 @@ public class JobManagerService : BackgroundService
         IServiceScopeFactory factory,
         IExecutionProvider jobProvider,
         IJobExecutionBag jobExecutionBag,
+        IJobManagerNotificationService notificationService,
         IOptions<JobServiceOptions> options)
     {
         _logger = logger;
         _factory = factory;
-        _options = options.Value;
         _jobProvider = jobProvider;
         _jobExecutionBag = jobExecutionBag;
+        _notificationService = notificationService;
+        _options = options.Value;
+
         ServiceInvocationIntervalInSeconds = TimeSpan.FromSeconds(_options.ServiceInvocationIntervalInSeconds);
     }
 
@@ -77,7 +81,11 @@ public class JobManagerService : BackgroundService
                 break;
             }
 
-            var tickResult = jobManager.Value.Tick(_jobExecutionBag, _jobProvider);
+            var tickResult = await jobManager.Value.Tick(
+                _jobExecutionBag,
+                _jobProvider,
+                _notificationService,
+                stoppingToken);
 
             if (tickResult.IsFailed)
             {

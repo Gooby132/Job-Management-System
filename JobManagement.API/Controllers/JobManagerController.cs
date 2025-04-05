@@ -9,7 +9,6 @@ using JobManagement.Domain.JobManagers.Entities.Abstractions;
 using JobManagement.Domain.JobManagers.Entities.Errors;
 using JobManagement.Domain.JobManagers.Entities.ValueObjects;
 using JobManagement.Domain.JobManagers.Services;
-using JobManagement.Infrastructure.ConcreteJobs.JobProviderService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobManagement.API.Controllers;
@@ -38,11 +37,58 @@ public class JobManagerController : ControllerBase
         _executionBag = executionBag;
     }
 
-    [HttpGet("available-jobs")]
+    [HttpGet("get-job")]
+    public async Task<IActionResult> GetJob([FromQuery] GetJobRequest request, CancellationToken token = default)
+    {
+        var jobName = JobName.Create(request.JobName);
+
+        if (jobName.IsFailed)
+            return BadRequest(new AppendJobResponse
+            {
+                Errors = jobName.Errors.ToDtos()
+            });
+
+        var jobManager = await _jobManagerRepository.GetJobManager(token);
+
+        if (jobManager.IsFailed)
+        {
+            _logger.LogWarning("{this} failed fetching repository. errors - {errors}",
+                this, string.Join(", ", jobManager.Errors.Select(e => e.Message)));
+
+            return BadRequest(new GetJobResponse
+            {
+                Errors = jobManager.Errors.ToDtos()
+            });
+        }
+
+        if (jobManager.Value is null)
+        {
+            _logger.LogError("{this} job manager was not found",
+                this);
+
+            return Problem("repository error");
+        }
+
+        var job = jobManager.Value.GetJobByJobName(jobName.Value);
+
+        if (job is null)
+            return NotFound(new GetJobResponse
+            {
+                Errors = [JobsErrorFactory.JobWasNotFound().ToDto()]
+            });
+
+        return Ok(new GetJobResponse
+        {
+            Job = job.ToDto()
+        });
+
+    }
+
+    [HttpGet("available-job-executions")]
     public IActionResult AvailableJobs(CancellationToken token = default) =>
         Ok(new AvailableJobsResponse
         {
-            Jobs = _jobProvider.AvailableJobs
+            JobExecutions = _jobProvider.AvailableJobs
         });
 
     [HttpGet("jobs-statuses")]
@@ -71,11 +117,18 @@ public class JobManagerController : ControllerBase
 
         var executions = _executionBag.GetExecutions();
         var joinedJobAndExec = jobManager.Value.Jobs
-            .Join(executions, j => j.Name, e => e.JobName, (job, exec) =>
-                new KeyValuePair<Job, IJobExecution>(
+            .GroupJoin(executions, j => j.Name, e => e.JobName, (job, exec) =>
+                new
+                {
                     job,
+                    exec
+                })
+            .SelectMany(
+                je => je.exec.DefaultIfEmpty(),
+                (je, exec) => new KeyValuePair<Job, IJobExecution>(
+                    je.job,
                     exec.Execution
-                    ));
+            )).ToList();
 
         return Ok(new JobsStatusesResponse
         {
@@ -108,7 +161,7 @@ public class JobManagerController : ControllerBase
             request.ExecutionTimeInUtc
         );
 
-        if(job.IsFailed)
+        if (job.IsFailed)
             return BadRequest(new AppendJobResponse
             {
                 Errors = job.Errors.ToDtos()
@@ -168,7 +221,7 @@ public class JobManagerController : ControllerBase
     public async Task<IActionResult> StartJob(StartJobRequest request, CancellationToken cancellationToken)
     {
 
-        var jobName = JobName.Create(request.Name);
+        var jobName = JobName.Create(request.JobName);
 
         if (jobName.IsFailed)
         {
@@ -235,7 +288,7 @@ public class JobManagerController : ControllerBase
     public async Task<IActionResult> RequestStopJob(RequestStopJobRequest request, CancellationToken cancellationToken)
     {
 
-        var jobName = JobName.Create(request.Name);
+        var jobName = JobName.Create(request.JobName);
 
         if (jobName.IsFailed)
         {
@@ -369,7 +422,7 @@ public class JobManagerController : ControllerBase
     public async Task<IActionResult> DeleteJob(DeleteJobRequest request, CancellationToken cancellationToken)
     {
 
-        var jobName = JobName.Create(request.Name);
+        var jobName = JobName.Create(request.JobName);
 
         if (jobName.IsFailed)
         {

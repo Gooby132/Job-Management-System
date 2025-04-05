@@ -2,7 +2,7 @@ import { Box, Container, List, Stack, Text, Title } from "@mantine/core";
 
 type Props = {};
 
-export const Landing = (props: Props) => {
+export const Landing = ({}: Props) => {
   return (
     <Container>
       <Title>Job Management Service</Title>
