@@ -4,9 +4,9 @@ using JobManagement.API.Helpers;
 using JobManagement.API.Hubs;
 using JobManagement.Domain.Common;
 using JobManagement.Domain.JobManagers;
-using JobManagement.Domain.JobManagers.Entities;
-using JobManagement.Domain.JobManagers.Entities.Abstractions;
-using JobManagement.Domain.JobManagers.Entities.Errors;
+using JobManagement.Domain.JobManagers.Jobs;
+using JobManagement.Domain.JobManagers.Jobs.Abstractions;
+using JobManagement.Domain.JobManagers.Jobs.Errors;
 using JobManagement.Domain.JobManagers.Services;
 using Microsoft.AspNetCore.SignalR;
 

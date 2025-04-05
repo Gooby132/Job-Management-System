@@ -1,6 +1,6 @@
-﻿using JobManagement.Domain.JobManagers.Entities.ValueObjects;
+﻿using JobManagement.Domain.JobManagers.Jobs.ValueObjects;
 
-namespace JobManagement.Domain.JobManagers.Entities.Abstractions;
+namespace JobManagement.Domain.JobManagers.Jobs.Abstractions;
 
 /// <summary>
 /// Represents all the available executions on remote/local services

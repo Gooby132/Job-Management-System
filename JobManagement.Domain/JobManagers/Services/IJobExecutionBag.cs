@@ -1,6 +1,6 @@
 ﻿using FluentResults;
-using JobManagement.Domain.JobManagers.Entities.Abstractions;
-using JobManagement.Domain.JobManagers.Entities.ValueObjects;
+using JobManagement.Domain.JobManagers.Jobs.Abstractions;
+using JobManagement.Domain.JobManagers.Jobs.ValueObjects;
 
 namespace JobManagement.Domain.JobManagers.Services;
 

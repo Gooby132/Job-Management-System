@@ -1,5 +1,5 @@
-﻿using JobManagement.Domain.JobManagers.Entities.Abstractions;
-using JobManagement.Domain.JobManagers.Entities.ValueObjects;
+﻿using JobManagement.Domain.JobManagers.Jobs.Abstractions;
+using JobManagement.Domain.JobManagers.Jobs.ValueObjects;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 

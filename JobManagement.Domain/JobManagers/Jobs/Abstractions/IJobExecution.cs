@@ -1,7 +1,7 @@
 ﻿using FluentResults;
-using JobManagement.Domain.JobManagers.Entities.ValueObjects;
+using JobManagement.Domain.JobManagers.Jobs.ValueObjects;
 
-namespace JobManagement.Domain.JobManagers.Entities.Abstractions;
+namespace JobManagement.Domain.JobManagers.Jobs.Abstractions;
 
 /// <summary>
 /// Should represent an execution for a job
@@ -20,17 +20,17 @@ public interface IJobExecution
     public int Progress { get; }
 
     /// <summary>
-    /// Represents if the execution failed
+    /// Represents if the execution has failed
     /// </summary>
     public bool IsFailed { get; }
 
     /// <summary>
-    /// Represents if the execution was completed successfully
+    /// Represents if the execution stopped
     /// </summary>
     public bool IsCompleted { get; }
 
     /// <summary>
-    /// Represents if the execution stopped
+    /// Represents if the execution was canceled
     /// </summary>
     public bool IsCanceled { get; }
 

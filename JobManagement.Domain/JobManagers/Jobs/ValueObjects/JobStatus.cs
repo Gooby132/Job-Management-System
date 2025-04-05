@@ -1,13 +1,14 @@
 ﻿using Ardalis.SmartEnum;
 using FluentResults;
-using JobManagement.Domain.JobManagers.Entities.Errors;
+using JobManagement.Domain.Common;
+using JobManagement.Domain.JobManagers.Jobs.Errors;
 
-namespace JobManagement.Domain.JobManagers.Entities.ValueObjects;
+namespace JobManagement.Domain.JobManagers.Jobs.ValueObjects;
 
 /// <summary>
 /// Represents the state machine of the statuses of a job execution
 /// </summary>
-public class JobStatus : SmartEnum<JobStatus>
+public class JobStatus : SmartEnum<JobStatus>, IValueObject
 {
 
     public static readonly JobStatus Pending = new JobStatus(nameof(Pending), 1);
@@ -48,10 +49,10 @@ public class JobStatus : SmartEnum<JobStatus>
 
     public Result<JobStatus> Restart()
     {
-        if (this == Pending)
-            return JobsErrorFactory.CannotRestartJobWhichWasNotStarted();
+        if (this == Failed || this == Stopped)
+            return Restarting;
 
-        return Restarting;
+        return JobsErrorFactory.JobRestartIsAllowedOnlyOnStoppedOrFailedStatuses();
     }
 
     public Result<JobStatus> Delete()

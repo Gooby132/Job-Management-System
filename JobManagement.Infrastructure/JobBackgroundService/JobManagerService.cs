@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using JobManagement.Domain.Common;
 using JobManagement.Domain.JobManagers;
-using JobManagement.Domain.JobManagers.Entities.Abstractions;
+using JobManagement.Domain.JobManagers.Jobs.Abstractions;
 using JobManagement.Domain.JobManagers.Services;
 using JobManagement.Infrastructure.JobBackgroundService;
 using Microsoft.Extensions.DependencyInjection;

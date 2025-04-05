@@ -3,6 +3,6 @@
 public class RestartJobRequest
 {
 
-    public string? Name { get; set; }
+    public string? JobName { get; set; }
 
 }

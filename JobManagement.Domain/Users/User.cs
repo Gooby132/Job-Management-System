@@ -1,9 +1,13 @@
 ﻿using FluentResults;
+using JobManagement.Domain.Common;
 using JobManagement.Domain.Users.ValueObjects;
 
 namespace JobManagement.Domain.Users;
 
-public class User
+/// <summary>
+/// Represents a user
+/// </summary>
+public class User : IAggregateRoot
 {
 
     public required UserName Name { get; init; }

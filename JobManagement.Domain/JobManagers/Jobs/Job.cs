@@ -1,17 +1,17 @@
 ﻿using FluentResults;
 using JobManagement.Domain.Common;
-using JobManagement.Domain.JobManagers.Entities.Abstractions;
-using JobManagement.Domain.JobManagers.Entities.Entities;
-using JobManagement.Domain.JobManagers.Entities.Errors;
-using JobManagement.Domain.JobManagers.Entities.ValueObjects;
+using JobManagement.Domain.JobManagers.Jobs.Abstractions;
+using JobManagement.Domain.JobManagers.Jobs.Entities;
+using JobManagement.Domain.JobManagers.Jobs.Errors;
+using JobManagement.Domain.JobManagers.Jobs.ValueObjects;
 using JobManagement.Domain.JobManagers.Services;
 
-namespace JobManagement.Domain.JobManagers.Entities;
+namespace JobManagement.Domain.JobManagers.Jobs;
 
 /// <summary>
 /// Represents a job task with persistence support
 /// </summary>
-public class Job
+public class Job : IEntity
 {
 
     #region Properties
@@ -34,6 +34,14 @@ public class Job
 
     private Job() { }
 
+    /// <summary>
+    /// Factory method for validating job arguments
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="executionName"></param>
+    /// <param name="priorityValue">Priority of the job</param>
+    /// <param name="executionTimeInUtcString">when should the job run</param>
+    /// <returns></returns>
     public static Result<Job> Create(
         JobName name,
         JobExecutionName executionName,
@@ -73,11 +81,16 @@ public class Job
 
     #region Methods
 
+    /// <summary>
+    /// Requests the start of the job
+    /// </summary>
+    /// <param name="jobProvider">list of all available executables</param>
+    /// <param name="bag">bag of all running executables</param>
+    /// <returns></returns>
     internal Result<Job> Start(
         IExecutionProvider jobProvider,
         IJobExecutionBag bag)
     {
-
         var startStatus = Status.Start();
 
         if (startStatus.IsFailed)
@@ -104,11 +117,14 @@ public class Job
         return Result.Ok(this);
     }
 
+    /// <summary>
+    /// Requests the job to stop if allowed
+    /// </summary>
+    /// <param name="bag">bag of all running executables</param>
+    /// <returns></returns>
     internal Result<Job> RequestStopJob(
         IJobExecutionBag bag)
     {
-        Log.Append($"job with name - {Name} stopping");
-
         var stopStatus = Status.Stop();
 
         if (stopStatus.IsFailed)
@@ -121,11 +137,17 @@ public class Job
 
         execution.Stop();
 
+        Log.Append($"job with name - {Name} stopping");
         Status = stopStatus.Value;
 
         return Result.Ok(this);
     }
 
+    /// <summary>
+    /// Restarts the job
+    /// </summary>
+    /// <param name="bag">bag of all running executables</param>
+    /// <returns></returns>
     internal Result<Job> Restart(
         IJobExecutionBag bag)
     {
@@ -136,10 +158,8 @@ public class Job
 
         var execution = bag.GetExecutionByJobName(Name);
 
-        if (execution is null)
-            return JobsErrorFactory.CouldNotFindJobExecution();
-
-        execution.Stop();
+        if (execution is not null)
+            execution.Stop();
 
         Status = restartStatus.Value;
         Log.Append($"job with name - {Name} restarting");
@@ -147,6 +167,11 @@ public class Job
         return Result.Ok(this);
     }
 
+    /// <summary>
+    /// Flags the job for deletion and removes the executable from the executable bag
+    /// </summary>
+    /// <param name="bag"></param>
+    /// <returns></returns>
     internal Result<Job> Delete(IJobExecutionBag bag)
     {
         var deleteStatus = Status.Delete();
@@ -163,12 +188,18 @@ public class Job
         return Result.Ok(this);
     }
 
-    internal Result Completed()
+    /// <summary>
+    /// Marks the job as completed
+    /// </summary>
+    /// <returns></returns>
+    internal Result Completed(IJobExecutionBag bag)
     {
         var completed = Status.HasCompleted();
 
         if (completed.IsFailed)
             return Result.Fail(completed.Errors);
+
+        bag.RemoveExecutable(Name);
 
         Log.Append($"job with name - {Name} completed");
         Status = completed.Value;
@@ -177,6 +208,11 @@ public class Job
         return Result.Ok();
     }
 
+    /// <summary>
+    /// Marks the job as failed
+    /// </summary>
+    /// <param name="errorBase">error message appended to the log</param>
+    /// <returns></returns>
     internal Result Fail(ErrorBase errorBase)
     {
         var failed = Status.DidFail();
@@ -190,6 +226,11 @@ public class Job
         return Result.Ok();
     }
 
+    /// <summary>
+    /// Samples the executable and registers to the log
+    /// </summary>
+    /// <param name="bag"></param>
+    /// <returns></returns>
     internal Result Sample(IJobExecutionBag bag)
     {
         if (!Status.ShouldSample())
@@ -198,18 +239,15 @@ public class Job
         var execution = bag.GetExecutionByJobName(Name);
 
         if (execution is null)
-        {
-            Log.Append($"job with name - {Name} sampling execution");
-            return JobsErrorFactory.CouldNotFindJobExecution();
-        }
-
-        Log.Append($"job with name - {Name} sampling execution");
+            return Fail(JobsErrorFactory.CouldNotFindJobExecution());
 
         if (execution.IsCompleted)
-            return Completed();
+            return Completed(bag);
 
         if (execution.IsFailed)
-            return Fail(JobsErrorFactory.ExecutionJobFailedToStop());
+            return Fail(JobsErrorFactory.ExecutionJobFailed());
+
+        Log.Append($"job with name - {Name} sampling execution. progress - {execution.Progress}%");
 
         return Result.Ok();
     }
@@ -233,7 +271,10 @@ public class Job
             }
 
             if (execution.IsCanceled)
+            {
+                bag.RemoveExecutable(Name);
                 return true;
+            }
         }
 
         return false;

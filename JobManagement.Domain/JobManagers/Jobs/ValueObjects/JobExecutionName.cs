@@ -1,9 +1,10 @@
 ﻿using FluentResults;
-using JobManagement.Domain.JobManagers.Entities.Errors;
+using JobManagement.Domain.Common;
+using JobManagement.Domain.JobManagers.Jobs.Errors;
 
-namespace JobManagement.Domain.JobManagers.Entities.ValueObjects;
+namespace JobManagement.Domain.JobManagers.Jobs.ValueObjects;
 
-public class JobExecutionName
+public class JobExecutionName : IValueObject
 {
     public const int MaxNameLength = 50;
     public const int MinNameLength = 2;

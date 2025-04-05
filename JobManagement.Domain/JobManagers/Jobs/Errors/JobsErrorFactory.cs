@@ -1,8 +1,11 @@
 ﻿using FluentResults;
 using JobManagement.Domain.Common;
 
-namespace JobManagement.Domain.JobManagers.Entities.Errors;
+namespace JobManagement.Domain.JobManagers.Jobs.Errors;
 
+/// <summary>
+/// Represents all errors avaialable by the job manager
+/// </summary>
 public static class JobsErrorFactory
 {
     public const int JobsGroupCode = 1;
@@ -28,8 +31,8 @@ public static class JobsErrorFactory
     public static ErrorBase CannotStopJobWhichDidNotStart() =>
         new ErrorBase(JobsGroupCode, 7, "cannot stop job which did not start or already finished");
 
-    public static ErrorBase CannotRestartJobWhichWasNotStarted() =>
-        new ErrorBase(JobsGroupCode, 8, "cannot restart job which was not started");
+    public static ErrorBase JobRestartIsAllowedOnlyOnStoppedOrFailedStatuses() =>
+        new ErrorBase(JobsGroupCode, 8, "job restart is allowed only on stopped or failed statuses");
 
     public static ErrorBase CannotAppendJobAsMaxConcurrentJobsReached() =>
         new ErrorBase(JobsGroupCode, 9, "cannot append job as max concurrent jobs reached");

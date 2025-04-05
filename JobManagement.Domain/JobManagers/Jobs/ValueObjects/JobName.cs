@@ -1,9 +1,10 @@
 ﻿using FluentResults;
-using JobManagement.Domain.JobManagers.Entities.Errors;
+using JobManagement.Domain.Common;
+using JobManagement.Domain.JobManagers.Jobs.Errors;
 
-namespace JobManagement.Domain.JobManagers.Entities.ValueObjects;
+namespace JobManagement.Domain.JobManagers.Jobs.ValueObjects;
 
-public class JobName
+public class JobName : IValueObject
 {
 
     public const int MaxJobNameLength = 50;

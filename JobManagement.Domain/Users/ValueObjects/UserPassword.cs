@@ -1,9 +1,13 @@
 ﻿using FluentResults;
+using JobManagement.Domain.Common;
 using JobManagement.Domain.Users.Errors;
 
 namespace JobManagement.Domain.Users.ValueObjects;
 
-public class UserPassword
+/// <summary>
+/// Represents the password of the user
+/// </summary>
+public class UserPassword : IValueObject
 {
 
     public const int MaxUserPasswordLength = 100;

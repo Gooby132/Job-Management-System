@@ -1,4 +1,4 @@
-﻿using JobManagement.Domain.JobManagers.Entities.Abstractions;
+﻿using JobManagement.Domain.JobManagers.Jobs.Abstractions;
 using JobManagement.Domain.JobManagers.Services;
 using JobManagement.Infrastructure.Authorization.JwtAuthorization.DependencyInjection;
 using JobManagement.Infrastructure.ConcreteJobs.InMemoryJobExecutionBag;

@@ -1,6 +1,6 @@
 ﻿using FluentResults;
 using JobManagement.Domain.JobManagers;
-using JobManagement.Domain.JobManagers.Entities.Errors;
+using JobManagement.Domain.JobManagers.Jobs.Errors;
 using JobManagement.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

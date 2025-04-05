@@ -4,10 +4,10 @@ using JobManagement.API.Contracts.JobManager.Responses;
 using JobManagement.API.Helpers;
 using JobManagement.Domain.Common;
 using JobManagement.Domain.JobManagers;
-using JobManagement.Domain.JobManagers.Entities;
-using JobManagement.Domain.JobManagers.Entities.Abstractions;
-using JobManagement.Domain.JobManagers.Entities.Errors;
-using JobManagement.Domain.JobManagers.Entities.ValueObjects;
+using JobManagement.Domain.JobManagers.Jobs;
+using JobManagement.Domain.JobManagers.Jobs.Abstractions;
+using JobManagement.Domain.JobManagers.Jobs.Errors;
+using JobManagement.Domain.JobManagers.Jobs.ValueObjects;
 using JobManagement.Domain.JobManagers.Services;
 using JobManagement.Domain.Users;
 using JobManagement.Domain.Users.ValueObjects;
@@ -358,7 +358,7 @@ public class JobManagerController : ControllerBase
     public async Task<IActionResult> RestartJob(RestartJobRequest request, CancellationToken cancellationToken)
     {
 
-        var jobName = JobName.Create(request.Name);
+        var jobName = JobName.Create(request.JobName);
 
         if (jobName.IsFailed)
         {

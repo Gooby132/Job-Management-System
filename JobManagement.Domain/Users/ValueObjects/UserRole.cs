@@ -1,8 +1,9 @@
 ﻿using Ardalis.SmartEnum;
+using JobManagement.Domain.Common;
 
 namespace JobManagement.Domain.Users.ValueObjects;
 
-public class UserRole : SmartEnum<UserRole>
+public class UserRole : SmartEnum<UserRole>, IValueObject
 {
 
     public static readonly UserRole Operator = new UserRole(nameof(Operator), 1);

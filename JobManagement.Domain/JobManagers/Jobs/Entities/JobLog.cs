@@ -1,4 +1,4 @@
-﻿namespace JobManagement.Domain.JobManagers.Entities.Entities;
+﻿namespace JobManagement.Domain.JobManagers.Jobs.Entities;
 
 public class JobLog
 {

@@ -1,9 +1,13 @@
 ﻿using FluentResults;
+using JobManagement.Domain.Common;
 using JobManagement.Domain.Users.Errors;
 
 namespace JobManagement.Domain.Users.ValueObjects;
 
-public class UserName
+/// <summary>
+/// Represents the name of the user
+/// </summary>
+public class UserName : IValueObject
 {
 
     public const int MaxUserNameLength = 100;
@@ -11,6 +15,11 @@ public class UserName
 
     public required string Value { get; init; }
 
+    /// <summary>
+    /// Factory Method
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
     public static Result<UserName> Create(string? name)
     {
         if (string.IsNullOrWhiteSpace(name))

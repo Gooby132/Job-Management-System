@@ -1,6 +1,6 @@
 ﻿using Ardalis.SmartEnum;
 
-namespace JobManagement.Domain.JobManagers.Entities.ValueObjects;
+namespace JobManagement.Domain.JobManagers.Jobs.ValueObjects;
 
 public class JobPriority : SmartEnum<JobPriority>
 {

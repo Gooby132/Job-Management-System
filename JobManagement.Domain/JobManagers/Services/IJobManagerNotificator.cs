@@ -1,6 +1,6 @@
 ﻿using FluentResults;
 using JobManagement.Domain.Common;
-using JobManagement.Domain.JobManagers.Entities;
+using JobManagement.Domain.JobManagers.Jobs;
 
 namespace JobManagement.Domain.JobManagers.Services;
 

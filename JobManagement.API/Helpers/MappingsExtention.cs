@@ -2,8 +2,8 @@
 using JobManagement.API.Contracts.Commons.Dtos;
 using JobManagement.API.Contracts.JobManager.Dtos;
 using JobManagement.Domain.Common;
-using JobManagement.Domain.JobManagers.Entities;
-using JobManagement.Domain.JobManagers.Entities.Abstractions;
+using JobManagement.Domain.JobManagers.Jobs;
+using JobManagement.Domain.JobManagers.Jobs.Abstractions;
 
 namespace JobManagement.API.Helpers;
 

@@ -1,9 +1,9 @@
 ﻿using FluentResults;
 using JobManagement.Domain.Common;
-using JobManagement.Domain.JobManagers.Entities;
-using JobManagement.Domain.JobManagers.Entities.Abstractions;
-using JobManagement.Domain.JobManagers.Entities.Errors;
-using JobManagement.Domain.JobManagers.Entities.ValueObjects;
+using JobManagement.Domain.JobManagers.Jobs;
+using JobManagement.Domain.JobManagers.Jobs.Abstractions;
+using JobManagement.Domain.JobManagers.Jobs.Errors;
+using JobManagement.Domain.JobManagers.Jobs.ValueObjects;
 using JobManagement.Domain.JobManagers.Services;
 
 namespace JobManagement.Domain.JobManagers;
@@ -11,14 +11,14 @@ namespace JobManagement.Domain.JobManagers;
 /// <summary>
 /// Represent the db state manager of all jobs and validates steps 
 /// with the running processes
+/// this is the AR and the underlying entities (jobs) should be handled by this class only
 /// </summary>
-public class JobManager
+public class JobManager : IAggregateRoot
 {
 
     #region Properties
 
     public const int MaxConcurrentJobs = 5;
-
 
     public int Id { get; init; }
     public List<Job> Jobs { get; private set; } = new List<Job>();
@@ -30,7 +30,10 @@ public class JobManager
     private JobManager() { }
 
 
-    // Factory method for validation of arguments (which there're not)
+    /// <summary>
+    /// Factory method for validation of arguments (which there're not)
+    /// </summary>
+    /// <returns></returns>
     public static Result<JobManager> Create()
     {
         return new JobManager();
@@ -172,6 +175,13 @@ public class JobManager
 
     public Job? GetJobByJobName(JobName jobName) => Jobs.FirstOrDefault(j => j.Name == jobName);
 
+    public bool IsMaxConcurrentJobsReached() =>
+        Jobs.Count(j => j.Status == JobStatus.Pending) >= MaxConcurrentJobs;
+
+    #endregion
+
+    #region Supports
+
     private Result<Job> FindJobByJobName(JobName jobName)
     {
         var job = Jobs.FirstOrDefault(j => j.Name == jobName);
@@ -181,13 +191,6 @@ public class JobManager
 
         return job;
     }
-
-    #endregion
-
-    #region Supports
-
-    public bool IsMaxConcurrentJobsReached() =>
-        Jobs.Count(j => j.Status == JobStatus.Pending) >= MaxConcurrentJobs;
 
     #endregion
 
