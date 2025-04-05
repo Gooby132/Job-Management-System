@@ -56,11 +56,11 @@ public class JobStatus : SmartEnum<JobStatus>
 
     public Result<JobStatus> Delete()
     {
-        if (!(this != Completed ||
-            this != Failed))
-            return JobsErrorFactory.CannotDeleteJobNotInCompletedOrFailedStatus();
-
-        return PendingDeletion;
+        if (this == Completed ||
+            this == Failed)
+            return PendingDeletion;
+        
+        return JobsErrorFactory.CannotDeleteJobNotInCompletedOrFailedStatus();
     }
 
     public Result<JobStatus> HasCompleted()
@@ -77,9 +77,9 @@ public class JobStatus : SmartEnum<JobStatus>
         return Completed;
     }
 
-    public Result<JobStatus> DidFail() 
+    public Result<JobStatus> DidFail()
     {
-        if(this == Pending)
+        if (this == Pending)
             return Result.Fail(JobsErrorFactory.CannotFailJobStatusWhichDidNotRun());
 
         if (this == Completed)

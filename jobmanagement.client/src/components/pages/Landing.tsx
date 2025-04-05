@@ -1,14 +1,15 @@
 import { Box, Container, List, Stack, Text, Title } from "@mantine/core";
+import { PageTitle } from "../atoms/PageTitle";
 
 type Props = {};
 
 export const Landing = ({}: Props) => {
   return (
     <Container>
-      <Title>Job Management Service</Title>
-      <Stack>
+      <Stack gap={"lg"}>
+        <PageTitle title="Welcome to the Job Management Service" />
         <Box>
-          <Title>Overview</Title>
+          <Title order={3}>Overview</Title>
           <Text>
             Our job management service is designed to handle the execution of
             jobs, monitor their state, and ensure efficient processing. It
@@ -17,7 +18,7 @@ export const Landing = ({}: Props) => {
           </Text>
         </Box>
         <Box>
-          <Title>Key Features</Title>
+          <Title order={3}>Key Features</Title>
           <List>
             <List.Item>Submit and execute jobs dynamically</List.Item>
             <List.Item>
@@ -30,7 +31,7 @@ export const Landing = ({}: Props) => {
           </List>
         </Box>
         <Box>
-          <Title>How It Works</Title>
+          <Title order={3}>How It Works</Title>
           <Text>
             Users submit executables through an API or web interface. The
             service schedules the job based on available resources and executes
