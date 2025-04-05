@@ -15,7 +15,6 @@ export const startSignalRConnection = async () => {
     .build();
 
   connection.on("JobStatusChanged", (response: JobsStatusesResponse) => {
-    console.log(response);
     dispatch(jobsActions.setJobStatuses(response));
   });
 

@@ -40,8 +40,15 @@ public class JobManager
 
     #region Methods
 
+    /// <summary>
+    /// Appends job into the correct position based on priority
+    /// </summary>
+    /// <param name="job"></param>
+    /// <returns></returns>
     public Result AppendJob(Job job)
     {
+        if (GetJobByJobName(job.Name) != null)
+            return JobsErrorFactory.JobWithTheSameNameAlreadyExists();
 
         if (job.Priority == JobPriority.Regular)
         {
@@ -94,16 +101,24 @@ public class JobManager
         return job.Value.Restart(bag);
     }
 
-    public Result<Job> RequestDeleteJob(JobName jobName)
+    public Result<Job> RequestDeleteJob(JobName jobName, IJobExecutionBag bag)
     {
         var job = FindJobByJobName(jobName);
 
         if (job.IsFailed)
             return Result.Fail(job.Errors);
 
-        return job.Value.Delete();
+        return job.Value.Delete(bag);
     }
 
+    /// <summary>
+    /// Iterates over the jobs and sample their statuses
+    /// </summary>
+    /// <param name="bag">executions</param>
+    /// <param name="jobProvider">execution factory</param>
+    /// <param name="notificationService">jobs sampled notification</param>
+    /// <param name="token"></param>
+    /// <returns></returns>
     public async Task<Result> Tick(
         IJobExecutionBag bag,
         IExecutionProvider jobProvider,
@@ -116,8 +131,8 @@ public class JobManager
         {
             if (job.ShouldStart(bag))
             {
-                if (Jobs.Count(j => j.Status == JobStatus.Pending) >= MaxConcurrentJobs)
-                    break;
+                if (IsMaxConcurrentJobsReached())
+                    continue;
 
                 var startResult = job.Start(
                     jobProvider,
@@ -126,13 +141,13 @@ public class JobManager
                 if (startResult.IsFailed)
                     errors.AddRange(startResult.Errors);
 
-                break;
+                continue;
             }
 
             var sample = job.Sample(bag);
 
             if (sample.IsFailed)
-                return Result.Fail(sample.Errors);
+                errors.AddRange(sample.Errors);
 
             if (job.Status == JobStatus.PendingDeletion)
             {
@@ -166,6 +181,13 @@ public class JobManager
 
         return job;
     }
+
+    #endregion
+
+    #region Supports
+
+    public bool IsMaxConcurrentJobsReached() =>
+        Jobs.Count(j => j.Status == JobStatus.Pending) >= MaxConcurrentJobs;
 
     #endregion
 

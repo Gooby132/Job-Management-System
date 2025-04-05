@@ -1,4 +1,5 @@
-﻿using JobManagement.Domain.Common;
+﻿using FluentResults;
+using JobManagement.Domain.Common;
 
 namespace JobManagement.Domain.Users.Errors;
 
@@ -10,5 +11,6 @@ public static class UserErrorFactory
     public static ErrorBase UserNameIsInvalid() => new(GroupCode, 1, "user name is invalid");
     public static ErrorBase UserNameIsTooShort() => new(GroupCode, 2, "user name too short");
     public static ErrorBase UserNameIsTooLong() => new(GroupCode, 3, "user name too long");
+    public static ErrorBase RepositoryError() => new(GroupCode, 4, "user repository error");
 
 }

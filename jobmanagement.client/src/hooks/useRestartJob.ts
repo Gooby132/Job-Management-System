@@ -18,7 +18,7 @@ export const useRestartJob = (): [
     setIsLoading(true);
     setResponse(undefined);
 
-    const result = await jobManagerRestClient.deleteJob(request);
+    const result = await jobManagerRestClient.restartJob(request);
 
     if (result.errors) {
       notifyErrors({ errors: result.errors });

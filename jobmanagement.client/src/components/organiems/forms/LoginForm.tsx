@@ -1,6 +1,6 @@
 import { Box, Button, Stack, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { LoginRequest } from "../../../services/jobManager/contracts/jobManagerContracts";
+import { LoginRequest } from "../../../services/users/contracts/userContracts";
 
 const USER_NAME_MAX_LENGTH = 20;
 const USER_NAME_MIN_LENGTH = 2;
@@ -17,7 +17,7 @@ export type LoginFormValues = {
   password: string;
 };
 
-export const LoginForm = ({}: Props) => {
+export const LoginForm = ({ onSubmit }: Props) => {
   const form = useForm<LoginRequest>({
     initialValues: {
       userName: "",
@@ -27,8 +27,8 @@ export const LoginForm = ({}: Props) => {
       userName: (value) =>
         value.length < USER_NAME_MIN_LENGTH ||
         value.length > USER_NAME_MAX_LENGTH
-          ? null
-          : "Invalid username",
+          ? "Invalid username"
+          : null,
       password: (value) =>
         value.length < PASSWORD_MIN_LENGTH || value.length > PASSWORD_MAX_LENGTH
           ? null
@@ -39,7 +39,7 @@ export const LoginForm = ({}: Props) => {
   return (
     <Box
       component="form"
-      onSubmit={form.onSubmit((values) => console.log(values))}
+      onSubmit={form.onSubmit(onSubmit)}
     >
       <Stack gap="lg">
         <TextInput

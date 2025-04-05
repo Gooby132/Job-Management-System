@@ -21,6 +21,7 @@ import { useDeleteJob } from "../../hooks/useDeleteJob";
 import { AlertJobOperationModal } from "../organiems/modals/AlertJobOperationModal";
 import { JobStatusMark } from "../atoms/JobStatusMark";
 import { JobPriorityMark } from "../atoms/JobPriorityMark";
+import { PageTitle } from "../atoms/PageTitle";
 
 type Props = {};
 
@@ -64,7 +65,7 @@ export const Job = ({}: Props) => {
     <Container>
       <LoadingOverlay visible={loadingVisible} />
       <Stack gap={"lg"}>
-        <Title>Job - {getJobResponse?.job?.name}</Title>
+        <PageTitle title={`Job - ${getJobResponse?.job?.name}`} />
 
         <Box>
           <Group justify="space-between">

@@ -9,7 +9,6 @@ namespace JobManagement.Domain.JobManagers.Services;
 /// </summary>
 public interface IJobExecutionBag
 {
-
     public Result RemoveExecutable(JobName jobName);
     public Result AppendExecutable(JobName jobName, IJobExecution execution);
     public IJobExecution? GetExecutionByJobName(JobName jobName);

@@ -47,6 +47,7 @@ export type GetAvailableJobsExecutionsResponse = {
 
 export type DeleteJobRequest = {
   jobName: string;
+  userToken: string;
 }
 
 export type DeleteJobResponse = {
@@ -97,6 +98,7 @@ export type StartJobResponse = {
 
 export type JobDto = {
   name: string;
+  executionName: string;
   priorityValue: number;
   statusValue: number;
   progress: number;

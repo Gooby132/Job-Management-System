@@ -27,4 +27,6 @@ public class UserPassword
         return new UserPassword { Value = password };
     }
 
+    public bool IsMatch(UserPassword other) => Value == other.Value;
+
 }

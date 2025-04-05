@@ -25,4 +25,6 @@ public class User
         };
     }
 
+    public bool IsPasswordsMatch(UserPassword password) => Password.IsMatch(password); 
+
 }

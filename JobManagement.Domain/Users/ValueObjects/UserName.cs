@@ -13,7 +13,7 @@ public class UserName
 
     public static Result<UserName> Create(string? name)
     {
-        if(string.IsNullOrWhiteSpace(name))
+        if (string.IsNullOrWhiteSpace(name))
             return UserErrorFactory.UserNameIsInvalid();
 
         if (name.Length < MinUserNameLength)
@@ -24,5 +24,16 @@ public class UserName
 
         return new UserName { Value = name };
     }
+
+    public static bool operator ==(UserName left, UserName right) => left.Equals(right); 
+    public static bool operator !=(UserName left, UserName right) => !left.Equals(right); 
+
+    public override string ToString() => Value;
+   
+    public override int GetHashCode() => Value.GetHashCode();
+    
+    public override bool Equals(object? obj) => 
+        obj is UserName &&
+        ((obj as UserName)!.Value) == Value;
 
 }

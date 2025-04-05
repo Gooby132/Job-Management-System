@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { JobDto, JobsStatusesResponse } from "../../../services/jobManager/contracts/jobManagerContracts";
+import { AppendJobResponse, JobDto, JobsStatusesResponse } from "../../../services/jobManager/contracts/jobManagerContracts";
 
 type JobsState = {
   jobs: JobDto[];
@@ -15,6 +15,9 @@ export const jobs = createSlice({
   reducers: {
     setJobStatuses: (state, action: PayloadAction<JobsStatusesResponse>) => {
       state.jobs = action.payload.jobs ?? [];
+    },
+    appendJob: (state, action: PayloadAction<AppendJobResponse>) => {
+      state.jobs = action.payload.job ? [...state.jobs, action.payload.job] : state.jobs;
     }
   },
 });

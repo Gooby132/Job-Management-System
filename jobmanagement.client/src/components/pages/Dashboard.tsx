@@ -6,30 +6,27 @@ import {
   LoadingOverlay,
   Stack,
   Table,
-  Title,
 } from "@mantine/core";
 import { useJobStatuses } from "../../hooks/useJobStatuses";
 import { useEffect } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { AppendJobModal } from "../organiems/modals/AppendJobModal";
-import {
-  AppendJobRequest,
-} from "../../services/jobManager/contracts/jobManagerContracts";
+import { AppendJobRequest } from "../../services/jobManager/contracts/jobManagerContracts";
 import { useAppendJob } from "../../hooks/useAppendJob";
-import dayjs from "dayjs";
 import { Link } from "react-router-dom";
 import { JOB_ROUTE } from "../routing/Routes";
 import { JobStatusMark } from "../atoms/JobStatusMark";
 import { JobPriorityMark } from "../atoms/JobPriorityMark";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
+import { DateTimeDisplay } from "../atoms/DateTimeDisplay";
+import { PageTitle } from "../atoms/PageTitle";
 
 type Props = {};
 
 export const Dashboard = ({}: Props) => {
   const [appendJob, appendJobIsLoading] = useAppendJob();
-  const [getJobsStatuses, jobStatusesIsLoading] =
-    useJobStatuses();
+  const [getJobsStatuses, jobStatusesIsLoading] = useJobStatuses();
   const jobs = useSelector((state: RootState) => state.jobsSlice).jobs;
 
   const [
@@ -49,30 +46,27 @@ export const Dashboard = ({}: Props) => {
   const rows = jobs?.map((job) => (
     <Table.Tr key={job.name} ta={"center"}>
       <Table.Td>{job.name}</Table.Td>
+      <Table.Td>{job.executionName}</Table.Td>
       <Table.Td>{<JobPriorityMark jobPriority={job.priorityValue} />}</Table.Td>
       <Table.Td>
         <JobStatusMark jobStatus={job.statusValue} />
       </Table.Td>
       <Table.Td>{job.progress}%</Table.Td>
       <Table.Td>
-        {dayjs(job.createdInUtc).format(`DD/MM/YYYY HH:mm:ss`)}
+        <DateTimeDisplay dateTime={job.createdInUtc} />
       </Table.Td>
       <Table.Td>
-        {dayjs(job.executionTimeInUtc).format(`DD/MM/YYYY HH:mm:ss`)}
+        <DateTimeDisplay dateTime={job.executionTimeInUtc} />
       </Table.Td>
       <Table.Td>
-        {job.startTimeInUtc != null
-          ? dayjs(job.startTimeInUtc).format(`DD/MM/YYYY HH:mm:ss`)
-          : "-"}
+        <DateTimeDisplay dateTime={job.startTimeInUtc} />
       </Table.Td>
       <Table.Td>
-        {job.endTimeInUtc != null
-          ? dayjs(job.endTimeInUtc).format(`DD/MM/YYYY HH:mm:ss`)
-          : "-"}
+        <DateTimeDisplay dateTime={job.endTimeInUtc} />
       </Table.Td>
       <Table.Td>
         <Button component={Link} to={`${JOB_ROUTE}/${job.name}`}>
-          Open
+          Details
         </Button>
       </Table.Td>
     </Table.Tr>
@@ -81,7 +75,7 @@ export const Dashboard = ({}: Props) => {
   return (
     <Container>
       <Stack pt={"lg"} gap={"lg"}>
-        <Title>Job Dashboard</Title>
+        <PageTitle title={"Job Dashboard"} />
 
         <Group>
           <Button onClick={appendJobModalOpen}>Add Job</Button>
@@ -101,6 +95,7 @@ export const Dashboard = ({}: Props) => {
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th>Job Name</Table.Th>
+                  <Table.Th>Execution Name</Table.Th>
                   <Table.Th>Priority</Table.Th>
                   <Table.Th>Status</Table.Th>
                   <Table.Th>Progress</Table.Th>

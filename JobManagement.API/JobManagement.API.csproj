@@ -21,9 +21,6 @@
   <ItemGroup>
     <Folder Include="Contracts\Commons\Requests\" />
     <Folder Include="Contracts\Commons\Responses\" />
-    <Folder Include="Contracts\Users\Dtos\" />
-    <Folder Include="Contracts\Users\Requests\" />
-    <Folder Include="Contracts\Users\Responses\" />
   </ItemGroup>
 
 </Project>

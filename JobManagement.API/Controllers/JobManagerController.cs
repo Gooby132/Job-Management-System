@@ -9,6 +9,9 @@ using JobManagement.Domain.JobManagers.Entities.Abstractions;
 using JobManagement.Domain.JobManagers.Entities.Errors;
 using JobManagement.Domain.JobManagers.Entities.ValueObjects;
 using JobManagement.Domain.JobManagers.Services;
+using JobManagement.Domain.Users;
+using JobManagement.Domain.Users.ValueObjects;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobManagement.API.Controllers;
@@ -418,6 +421,7 @@ public class JobManagerController : ControllerBase
         });
     }
 
+    [Authorize(Roles = nameof(UserRole.Operator))]
     [HttpPost("delete-job")]
     public async Task<IActionResult> DeleteJob(DeleteJobRequest request, CancellationToken cancellationToken)
     {
@@ -456,7 +460,7 @@ public class JobManagerController : ControllerBase
             return Problem("repository error");
         }
 
-        var delete = jobManager.Value.RequestDeleteJob(jobName.Value);
+        var delete = jobManager.Value.RequestDeleteJob(jobName.Value, _executionBag);
 
         if (delete.IsFailed)
         {

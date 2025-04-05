@@ -7,7 +7,7 @@ namespace JobManagement.API
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -25,11 +25,13 @@ namespace JobManagement.API
             }
 
             app.Services.SeedLocalExecutables();
+            await app.Services.RunPersistence(app.Lifetime.ApplicationStopping);
 
             app.UseCors();
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.MapHub<JobManagerHub>("/api/JobManagerHub");
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();

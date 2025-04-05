@@ -91,10 +91,7 @@ public class Job
         var runExecutable = bag.AppendExecutable(Name, exec);
 
         if (runExecutable.IsFailed)
-        {
-            Status = JobStatus.Failed;
-            return Result.Fail(runExecutable.Errors);
-        }
+            return Fail(JobsErrorFactory.CouldNotAttachJobExecutable());
 
         exec.Run();
 
@@ -150,12 +147,14 @@ public class Job
         return Result.Ok(this);
     }
 
-    internal Result<Job> Delete()
+    internal Result<Job> Delete(IJobExecutionBag bag)
     {
         var deleteStatus = Status.Delete();
 
         if (deleteStatus.IsFailed)
             return Result.Fail(deleteStatus.Errors);
+
+        bag.RemoveExecutable(Name);
 
         Status = deleteStatus.Value;
         EndTimeInUtc = DateTime.UtcNow;
@@ -168,7 +167,7 @@ public class Job
     {
         var completed = Status.HasCompleted();
 
-        if(completed.IsFailed)
+        if (completed.IsFailed)
             return Result.Fail(completed.Errors);
 
         Log.Append($"job with name - {Name} completed");
@@ -182,7 +181,7 @@ public class Job
     {
         var failed = Status.DidFail();
 
-        if(failed.IsFailed)
+        if (failed.IsFailed)
             return Result.Fail(failed.Errors);
 
         Log.Append($"job with name - {Name} failed. error - {errorBase.Message}");

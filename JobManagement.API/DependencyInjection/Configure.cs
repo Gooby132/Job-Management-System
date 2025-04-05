@@ -15,15 +15,15 @@ public static class Configure
 
         services.AddControllers();
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
 
         services.AddCors(builder =>
         {
             builder.AddDefaultPolicy(p =>
             {
+                p.WithOrigins("http://localhost:5173");
                 p.AllowAnyHeader();
                 p.AllowAnyMethod();
-                p.AllowAnyOrigin();
+                p.AllowCredentials();
             });
         });
 

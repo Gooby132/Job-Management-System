@@ -25,6 +25,7 @@ public static class ErrorExtension
     public static JobDto ToDto(this Job job, IJobExecution? execution = null) => new JobDto
     {
         Name = job.Name.Value,
+        ExecutionName = job.ExecutionName.Value,
         PriorityValue = job.Priority.Value,
         StatusValue = job.Status.Value,
         CreatedInUtc = job.CreatedInUtc.ToString("O"),

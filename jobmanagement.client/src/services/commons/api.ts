@@ -6,6 +6,7 @@ export const JOB_MANAGER_API_BASE_URL =
 
 export const api = axios.create({
   baseURL: JOB_MANAGER_API_BASE_URL,
+  withCredentials: false,
 });
 
 api.interceptors.response.use(null, (error): Promise<GenericResponse> => {

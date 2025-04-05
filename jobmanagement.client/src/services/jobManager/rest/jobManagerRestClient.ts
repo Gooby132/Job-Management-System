@@ -37,7 +37,11 @@ export const jobManagerRestClient: JobManagerClient = {
   },
   deleteJob: async (request) => {
     try {
-      const response = await api.post(`/JobManager/delete-job`, request);
+      const response = await api.post(`/JobManager/delete-job`, request,{
+        headers: {
+          Authorization: `Bearer ${request.userToken}`,
+        },
+      });
 
       return await response.data;
     } catch (e) {

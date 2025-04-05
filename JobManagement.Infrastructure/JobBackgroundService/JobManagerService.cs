@@ -2,16 +2,19 @@
 using JobManagement.Domain.Common;
 using JobManagement.Domain.JobManagers;
 using JobManagement.Domain.JobManagers.Entities.Abstractions;
-using JobManagement.Domain.JobManagers.Entities.ValueObjects;
 using JobManagement.Domain.JobManagers.Services;
-using JobManagement.Infrastructure.ConcreteJobs.InMemoryJobExecutionBag;
-using JobManagement.Infrastructure.ConcreteJobs.JobProviderService;
 using JobManagement.Infrastructure.JobBackgroundService;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+/// <summary>
+/// Represents a background service
+/// that fetches the job manager from the db
+/// allows it to sample the running executions
+/// and persists the values back to db
+/// </summary>
 public class JobManagerService : BackgroundService
 {
     #region Fields
@@ -55,7 +58,7 @@ public class JobManagerService : BackgroundService
     #region Execution
 
     /// <summary>
-    /// Fetches the job manager from db, samples current state, and persists it
+    /// Fetches the job manager and make it sample it's executions
     /// </summary>
     /// <param name="stoppingToken"></param>
     /// <returns></returns>

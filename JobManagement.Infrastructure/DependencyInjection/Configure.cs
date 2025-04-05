@@ -1,5 +1,6 @@
 ﻿using JobManagement.Domain.JobManagers.Entities.Abstractions;
 using JobManagement.Domain.JobManagers.Services;
+using JobManagement.Infrastructure.Authorization.JwtAuthorization.DependencyInjection;
 using JobManagement.Infrastructure.ConcreteJobs.InMemoryJobExecutionBag;
 using JobManagement.Infrastructure.ConcreteJobs.JobProviderService;
 using JobManagement.Infrastructure.ConcreteJobs.Jobs;
@@ -20,6 +21,9 @@ public static class Configure
 
         services.Configure<JobServiceOptions>(
             config.GetRequiredSection(JobServiceOptions.Key));
+
+        services.ConfigureJwtAuthorization(config);
+        services.AddSwaggerGen(c => c.AddSwaggerGenUsers(config));
 
         services.AddSingleton<IExecutionProvider, LocalExecutionProvider>();
         services.AddSingleton<IJobExecutionBag, JobExecutionBag>();

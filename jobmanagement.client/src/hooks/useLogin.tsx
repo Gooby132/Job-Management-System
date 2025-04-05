@@ -2,14 +2,18 @@ import { useState } from "react";
 import {
   LoginRequest,
   LoginResponse,
-} from "../services/jobManager/contracts/jobManagerContracts";
-import { jobManagerRestClient } from "../services/jobManager/rest/jobManagerRestClient";
+} from "../services/users/contracts/userContracts";
+import { userRestClient } from "../services/users/rest/userRestClient";
+import { useDispatch } from "react-redux";
+import { notifyErrors } from "../services/helpers/notifier";
+import { userActions } from "../redux/features/user/userSlice";
 
 export const useLogin = (): [
   (request: LoginRequest) => Promise<void>,
   boolean,
   LoginResponse | undefined
 ] => {
+  const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<LoginResponse>();
 
@@ -17,7 +21,13 @@ export const useLogin = (): [
     setIsLoading(true);
     setResponse(undefined);
 
-    const result = await jobManagerRestClient.login(request);
+    const result = await userRestClient.login(request);
+
+    if(result.errors)
+      notifyErrors({ errors: result.errors });
+
+    if(result.token)
+      dispatch(userActions.loginUser(result))
 
     setIsLoading(false);
     setResponse(result);

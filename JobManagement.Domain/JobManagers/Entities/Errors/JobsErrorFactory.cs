@@ -100,4 +100,7 @@ public static class JobsErrorFactory
     public static ErrorBase ExecutionJobFailed() =>
         new ErrorBase(JobsGroupCode, 31, "execution job failed");
 
+    public static Result JobWithTheSameNameAlreadyExists() => 
+        new ErrorBase(JobsGroupCode, 32, "a job with the same name already exists");
+
 }
