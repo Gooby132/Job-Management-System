@@ -14,6 +14,7 @@ The backend is structured using a **layered architecture**, promoting separation
 - **REST API** for handling HTTP requests
 - **SignalR Hub** for real-time job updates
 - **JWT Authentication** for securing endpoints
+- **Swagger** for API documentation
 - Responsible for user authorization and routing requests to the appropriate services
 
 #### 🧱 Infrastructure Layer
@@ -53,7 +54,9 @@ The frontend is a **React** application bootstrapped with **Vite** for lightning
   - Includes job logs and extra metadata
   - State management by Redux
 - **Retry Pattern**
-  -  Client side retry pattern using axios-retry
+  - Client side retry pattern using axios-retry
+- **Notifications**
+  - Implements notification system for invalid request bodies 
 ---
 
 ## 🔒 Authentication
